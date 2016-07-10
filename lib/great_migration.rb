@@ -16,7 +16,8 @@ class GreatMigration
     @aws = Fog::Storage.new({
       :provider => 'aws',
       :aws_access_key_id => options[:aws_key],
-      :aws_secret_access_key => options[:aws_secret]
+      :aws_secret_access_key => options[:aws_secret],
+      :region => options[:aws_region]
     })
     @rackspace_directory = rackspace.directories.get(options[:rackspace_container])
     @aws_directory = aws.directories.get(options[:aws_bucket])
@@ -55,7 +56,8 @@ class GreatMigration
     puts "--------------------------------------------------\n\n"
   end
 
-  private def copy_files(page, files)
+  private
+  def copy_files(page, files)
     puts "  [#{Process.pid}] Page #{page+1}: Copying #{files.size} files..."
     total = files.size
     max_processes = 8
@@ -81,7 +83,8 @@ class GreatMigration
     puts "  [#{Process.pid}] ** Page #{page+1}: Copied #{total} files in #{Time.now - time}secs"
   end
 
-  private def copy_file(file)
+  #private
+  def copy_file(file)
     if file.content_type == 'application/directory'
       # skip directories
     else
