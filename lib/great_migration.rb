@@ -32,25 +32,27 @@ class GreatMigration
 
   def copy
     time = Time.now
-    pages = rackspace_directory.count / per_page + 1
+    #pages = rackspace_directory.count / per_page + 1
     marker = ''
 
     # get Rackspace files
-    pages.times do |i|
-      puts "! Getting page #{i+1}..."
-      files = rackspace_directory.files.all(:limit => per_page, :marker => marker).to_a
-      puts "! #{files.size} files in page #{i+1}, forking..."
+    #pages.times do |i|
+      #puts "! Getting page #{i+1}..."
+      #files = rackspace_directory.files.all(:limit => per_page, :marker => marker).to_a
+    files = rackspace_directory.files.all.to_a
+    #puts "! #{files.size} files in page #{i+1}, forking..."
+    puts "Number of Files: #{files.size}"
       pid = fork do
-        copy_files(i, files)
+        copy_files_1(files)
       end
       puts "! Process #{pid} forked to copy files"
-      marker = files.last.key
-      @total += files.size
-    end
+      #marker = files.last.key
+      #@total += files.size
+    #end
 
-    pages.times do
+    #pages.times do
       Process.wait
-    end
+    #end
 
     puts "--------------------------------------------------"
     puts "! #{total} files copied in #{Time.now - time}secs."
@@ -82,6 +84,36 @@ class GreatMigration
     end
 
     puts "  [#{Process.pid}] ** Page #{page+1}: Copied #{total} files in #{Time.now - time}secs"
+  end
+
+  def copy_files_1(files)
+    #puts "  [#{Process.pid}] Page #{page+1}: Copying #{files.size} files..."
+    #total = files.size
+    #max_processes = 8
+    #process_pids = {}
+    time = Time.now
+
+    cont = 1
+    total_files = files.size
+    while !files.empty?
+      #while process_pids.size < max_processes and files.any? do
+        file = files.pop
+        pid = Process.fork do
+          copy_file(file)
+        end
+        process_pids[pid] = { :file => file }
+      #end
+
+      if pid_done = Process.wait
+        if job_finished = process_pids.delete(pid_done)
+          puts "    [#{Process.pid}] Copied #{job_finished[:file].key}."
+        end
+      end
+      p "File Number: #{cont} of #{total_files}"
+      cont+=1
+    end
+
+    #puts "  [#{Process.pid}] ** Page #{page+1}: Copied #{total} files in #{Time.now - time}secs"
   end
 
   #private
