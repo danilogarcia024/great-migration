@@ -7,6 +7,7 @@ class GreatMigration
   def initialize(options={})
     options = default_options.merge(options)
     @per_page = options[:per_page]
+    @check_duplicates = options[:aws_check_duplicates]
     @rackspace = Fog::Storage.new({
       :provider           => 'Rackspace',
       :rackspace_username => options[:rackspace_user],
@@ -26,7 +27,7 @@ class GreatMigration
   end
 
   def default_options
-    { :per_page => 10000 }
+    { :per_page => 10000, aws_check_duplicates: false }
   end
 
   def copy
@@ -85,15 +86,15 @@ class GreatMigration
 
   #private
   def copy_file(file)
-    if file.content_type == 'application/directory'
+    #if file.content_type == 'application/directory'
       # skip directories
-    else
+    #else
       aws_directory.files.create(
         :key          => file.key,
         :body         => file.body,
         :content_type => file.content_type,
         :public       => true)
-    end
+    #end
   end
 
 end
