@@ -27,7 +27,7 @@ class GreatMigration
   end
 
   def default_options
-    { :per_page => 1000000, aws_check_duplicates: false }
+    { :per_page => 1000000, aws_check_duplicates: true }
   end
 
   def copy
