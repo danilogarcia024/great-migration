@@ -90,7 +90,7 @@ class GreatMigration
     #puts "  [#{Process.pid}] Page #{page+1}: Copying #{files.size} files..."
     #total = files.size
     #max_processes = 8
-    #process_pids = {}
+    process_pids = {}
     time = Time.now
 
     cont = 1
